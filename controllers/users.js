@@ -60,7 +60,7 @@ const updateAvatarById = (req, res) => userModel.findByIdAndUpdate(req.user._id,
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
-  return userModel.create({ name, about, avatar })
+  return userModel.create({ ...{ name, about, avatar } })
     .then(() => res.status(HTTP_STATUS_CREATED).send({ message: 'Created' }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
