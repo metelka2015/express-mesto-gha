@@ -14,8 +14,8 @@ const getUsers = (req, res) => userModel.find({})
   .catch(() => res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' }));
 
 const getUserById = (req, res) => {
-  const { userID } = req.params;
-  return userModel.findById(userID)
+  const { userId } = req.params;
+  return userModel.findById(userId)
     .then((r) => {
       if (r === null) {
         return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
@@ -44,7 +44,7 @@ const updateUserById = (req, res) => userModel.findByIdAndUpdate(req.user._id, {
     return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
   });
 
-const updateAvatarById = (req, res) => userModel.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar })
+const updateAvatarById = (req, res) => userModel.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true })
   .then((r) => {
     if (r === null) {
       return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
@@ -60,8 +60,8 @@ const updateAvatarById = (req, res) => userModel.findByIdAndUpdate(req.user._id,
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
-  return userModel.create({ ...{ name, about, avatar } })
-    .then(() => res.status(HTTP_STATUS_CREATED).send({ message: 'Created' }))
+  return userModel.create({ name, about, avatar })
+    .then((r) => res.status(HTTP_STATUS_CREATED).send(r))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid Data' });

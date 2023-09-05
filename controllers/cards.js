@@ -29,7 +29,7 @@ const deleteCardById = (req, res) => {
   return cardModel.findByIdAndRemove(cardId)
     .then((user) => {
       if (user === null) {
-        return res.status(HTTP_STATUS_NOT_FOUND).send('User not found');
+        return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
       }
       return res.status(HTTP_STATUS_OK).send(user);
     })
@@ -48,7 +48,7 @@ const likeCard = (req, res) => cardModel.findByIdAndUpdate(
 )
   .then((user) => {
     if (user === null) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send('User not found');
+      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
     }
     return res.status(HTTP_STATUS_OK).send(user);
   })
@@ -68,7 +68,7 @@ const dislikeCard = (req, res) => cardModel.findByIdAndUpdate(
 )
   .then((user) => {
     if (user === null) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send('User not found');
+      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
     }
     return res.status(HTTP_STATUS_OK).send(user);
   })
