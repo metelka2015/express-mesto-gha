@@ -31,12 +31,7 @@ const getUserById = (req, res) => {
 };
 
 const updateUserById = (req, res) => userModel.findByIdAndUpdate(req.user._id, { name: req.body.name, about: req.body.about }, { new: true, runValidators: true })
-  .then((r) => {
-    if (r === null) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
-    }
-    return res.status(HTTP_STATUS_OK).send(r);
-  })
+  .then((r) => res.status(HTTP_STATUS_OK).send(r))
   .catch((err) => {
     if (err.name === 'ValidationError') {
       return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid Data' });
@@ -45,12 +40,7 @@ const updateUserById = (req, res) => userModel.findByIdAndUpdate(req.user._id, {
   });
 
 const updateAvatarById = (req, res) => userModel.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true })
-  .then((r) => {
-    if (r === null) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
-    }
-    return res.status(HTTP_STATUS_OK).send(r);
-  })
+  .then((r) => res.status(HTTP_STATUS_OK).send(r))
   .catch((err) => {
     if (err.name === 'ValidationError') {
       return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid Data' });
