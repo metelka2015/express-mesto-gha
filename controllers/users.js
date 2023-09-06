@@ -42,8 +42,8 @@ const updateUserById = (req, res) => userModel.findByIdAndUpdate(req.user._id, {
 const updateAvatarById = (req, res) => userModel.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true })
   .then((r) => res.status(HTTP_STATUS_OK).send(r))
   .catch((err) => {
-    if (err.name === 'ValidationError') {
-      return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid Data' });
+    if (err.name === 'CastError') {
+      return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid ID' });
     }
     return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
   });
