@@ -1,17 +1,21 @@
 /* eslint-disable no-console */
 const express = require('express');
 const mongoose = require('mongoose');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const helmet = require('helmet');
 const router = require('./routes');
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
+const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
+
+mongoose.connect(DB_URL, {
   useNewUrlParser: true,
 }).then(() => {
   console.log('Connected to DB');
 });
 
 const app = express();
-const port = 3000;
 app.use(express.json());
+app.use(helmet());
 
 // мидлвэр временное решение авторизации
 app.use((req, res, next) => {
@@ -24,6 +28,6 @@ app.use((req, res, next) => {
 
 app.use(router);
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`);
 });

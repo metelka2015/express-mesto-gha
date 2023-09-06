@@ -11,9 +11,8 @@ const {
 } = require('http2').constants;
 
 const createCard = (req, res) => cardModel.create({ name: req.body.name, link: req.body.link, owner: req.user._id })
-  .then((r) => res.status(HTTP_STATUS_CREATED).send(r))
+  .then((card) => res.status(HTTP_STATUS_CREATED).send(card))
   .catch((err) => {
-    console.log(err);
     if (err.name === 'ValidationError') {
       return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid Data' });
     }
@@ -21,19 +20,18 @@ const createCard = (req, res) => cardModel.create({ name: req.body.name, link: r
   });
 
 const getCards = (req, res) => cardModel.find({})
-  .then((r) => res.status(HTTP_STATUS_OK).send(r))
+  .then((card) => res.status(HTTP_STATUS_OK).send(card))
   .catch(() => res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' }));
 
 const deleteCardById = (req, res) => {
   const { cardId } = req.params;
   return cardModel.findByIdAndRemove(cardId)
-    .then((user) => {
-      if (user === null) {
-        return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
-      }
-      return res.status(HTTP_STATUS_OK).send(user);
-    })
+    .orFail(new Error('NotValidId'))
+    .then((card) => res.status(HTTP_STATUS_OK).send(card))
     .catch((err) => {
+      if (err.message === 'NotValidId') {
+        return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Card not found' });
+      }
       if (err.name === 'CastError') {
         return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid ID' });
       }
@@ -46,14 +44,12 @@ const likeCard = (req, res) => cardModel.findByIdAndUpdate(
   { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
   { new: true },
 )
-  .then((user) => {
-    if (user === null) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
-    }
-    return res.status(HTTP_STATUS_OK).send(user);
-  })
+  .orFail(new Error('NotValidId'))
+  .then((card) => res.status(HTTP_STATUS_OK).send(card))
   .catch((err) => {
-    console.log(err.name);
+    if (err.message === 'NotValidId') {
+      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Card not found' });
+    }
     if (err.name === 'CastError') {
       return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid ID' });
     }
@@ -66,14 +62,12 @@ const dislikeCard = (req, res) => cardModel.findByIdAndUpdate(
   { $pull: { likes: req.user._id } }, // убрать _id из массива
   { new: true },
 )
-  .then((user) => {
-    if (user === null) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
-    }
-    return res.status(HTTP_STATUS_OK).send(user);
-  })
+  .orFail(new Error('NotValidId'))
+  .then((card) => res.status(HTTP_STATUS_OK).send(card))
   .catch((err) => {
-    console.log(err.name);
+    if (err.message === 'NotValidId') {
+      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Card not found' });
+    }
     if (err.name === 'CastError') {
       return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid ID' });
     }

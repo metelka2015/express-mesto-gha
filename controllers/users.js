@@ -16,16 +16,17 @@ const getUsers = (req, res) => userModel.find({})
 const getUserById = (req, res) => {
   const { userId } = req.params;
   return userModel.findById(userId)
-    .then((r) => {
-      if (r === null) {
+    .orFail(new Error('NotValidId'))
+    .then((r) => res.status(HTTP_STATUS_OK).send(r))
+    .catch((err) => {
+      if (err.message === 'NotValidId') {
         return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'User not found' });
       }
-      return res.status(HTTP_STATUS_OK).send(r);
-    })
-    .catch((err) => {
+
       if (err.name === 'CastError') {
         return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid ID' });
       }
+
       return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
     });
 };
