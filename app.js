@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const helmet = require('helmet');
 const router = require('./routes');
+const { login } = require('./controllers/login');
+const { createUser } = require('./controllers/users');
 
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
@@ -17,14 +19,8 @@ const app = express();
 app.use(express.json());
 app.use(helmet());
 
-// мидлвэр временное решение авторизации
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64f5cd93b0d63bb0fe8edf62',
-  };
-
-  next();
-});
+app.post('/signup', createUser);
+app.post('/signin', login);
 
 app.use(router);
 

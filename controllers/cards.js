@@ -8,6 +8,7 @@ const {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
+  HTTP_STATUS_FORBIDDEN,
 } = require('http2').constants;
 
 const createCard = (req, res) => cardModel.create({ name: req.body.name, link: req.body.link, owner: req.user._id })
@@ -27,7 +28,11 @@ const deleteCardById = (req, res) => {
   const { cardId } = req.params;
   return cardModel.findByIdAndRemove(cardId)
     .orFail(new Error('NotValidId'))
-    .then((card) => res.status(HTTP_STATUS_OK).send(card))
+    .then((card) => {
+      if (`${card.owner}` !== req.user._id) {
+        return res.status(HTTP_STATUS_FORBIDDEN).send({ message: 'Вы не можете удалить чужую карточку' });
+      }
+      res.status(HTTP_STATUS_OK).send(card)})
     .catch((err) => {
       if (err.message === 'NotValidId') {
         return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Card not found' });

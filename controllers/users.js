@@ -9,6 +9,10 @@ const {
   HTTP_STATUS_CREATED,
 } = require('http2').constants;
 
+const bcrypt = require('bcrypt');
+
+const SALT_ROUNDS = 10;
+
 const getUsers = (req, res) => userModel.find({})
   .then((r) => res.status(HTTP_STATUS_OK).send(r))
   .catch(() => res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' }));
@@ -16,7 +20,9 @@ const getUsers = (req, res) => userModel.find({})
 const getUserById = (req, res) => {
   const { userId } = req.params;
   return userModel.findById(userId)
-    .orFail(new Error('NotValidId'))
+    .orFail(() => {
+      throw new NotFoundError('Пользователь не найден');
+    })
     .then((r) => res.status(HTTP_STATUS_OK).send(r))
     .catch((err) => {
       if (err.message === 'NotValidId') {
@@ -40,6 +46,12 @@ const updateUserById = (req, res) => userModel.findByIdAndUpdate(req.user._id, {
     return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
   });
 
+const getCurrentUser = (req, res) => userModel.findOne(req.user)
+  .then((user) => res.status(HTTP_STATUS_OK).send(user))
+  .catch((err) => {
+    return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
+  });
+
 const updateAvatarById = (req, res) => userModel.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true })
   .then((r) => res.status(HTTP_STATUS_OK).send(r))
   .catch((err) => {
@@ -50,14 +62,19 @@ const updateAvatarById = (req, res) => userModel.findByIdAndUpdate(req.user._id,
   });
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  return userModel.create({ name, about, avatar })
-    .then((r) => res.status(HTTP_STATUS_CREATED).send(r))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid Data' });
-      }
-      return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, SALT_ROUNDS)
+    .then((hash) => {
+      userModel.create({ name, about, avatar, email, password: hash })
+      .then((user) => res.status(HTTP_STATUS_CREATED).send(user))
+      .catch((err) => {
+        if (err.name === 'ValidationError') {
+          return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid Data' });
+        }
+        return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
+      });
     });
 };
 
@@ -67,4 +84,5 @@ module.exports = {
   updateUserById,
   updateAvatarById,
   createUser,
+  getCurrentUser,
 };
