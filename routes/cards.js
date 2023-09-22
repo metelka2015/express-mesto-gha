@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const router = require('express').Router();
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { celebrate, Joi } = require('celebrate');
@@ -21,19 +22,19 @@ router.post('/', celebrate({
 
 router.delete('/:cardId', celebrate({
   params: Joi.object().keys({
-    cardID: Joi.string().required().length(24).hex(),
+    cardId: Joi.string().required().length(24).hex(),
   }),
 }), deleteCardById);
 
 router.put('/:cardId/likes', celebrate({
   params: Joi.object().keys({
-    cardID: Joi.string().required().length(24).hex(),
+    cardId: Joi.string().required().length(24).hex(),
   }),
 }), likeCard);
 
 router.delete('/:cardId/likes', celebrate({
   params: Joi.object().keys({
-    cardID: Joi.string().required().length(24).hex(),
+    cardId: Joi.string().required().length(24).hex(),
   }),
 }), dislikeCard);
 

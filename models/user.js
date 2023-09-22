@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const mongoose = require('mongoose');
 
 // eslint-disable-next-line import/no-extraneous-dependencies

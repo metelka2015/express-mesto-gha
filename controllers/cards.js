@@ -1,10 +1,9 @@
-/* eslint-disable no-console */
 /* eslint-disable max-len */
-/* eslint-disable import/order */
 const cardModel = require('../models/card');
 const {
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
+// eslint-disable-next-line import/order
 } = require('http2').constants;
 const NotFoundError = require('../utils/errors/notFoundError');
 const ForbiddenError = require('../utils/errors/forbiddenError');

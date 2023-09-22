@@ -29,8 +29,17 @@ const updateUserById = (req, res, next) => userModel.findByIdAndUpdate(req.user.
   .then((r) => res.status(HTTP_STATUS_OK).send(r))
   .catch(next);
 
-const getCurrentUser = (req, res, next) => userModel.findOne(req.user)
-  .then((user) => res.status(HTTP_STATUS_OK).send(user))
+const getCurrentUser = (req, res, next) => userModel.findById({ _id: req.user._id })
+  .orFail(() => {
+    throw new NotFoundError('Пользователь не найден');
+  })
+  .then((user) => res.status(HTTP_STATUS_OK).send({
+    _id: user._id,
+    name: user.name,
+    about: user.about,
+    avatar: user.avatar,
+    email: user.email,
+  }))
   .catch(next);
 
 const updateAvatarById = (req, res, next) => userModel.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true })
@@ -46,7 +55,13 @@ const createUser = (req, res, next) => {
       userModel.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => res.status(HTTP_STATUS_CREATED).send(user))
+        .then((user) => res.status(HTTP_STATUS_CREATED).send({
+          _id: user._id,
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+        }))
         .catch(next);
     })
     .catch(next);

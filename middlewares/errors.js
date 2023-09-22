@@ -1,3 +1,4 @@
+// eslint-disable-next-line linebreak-style
 const conflictError = require('../utils/errors/conflictError');
 const validationError = require('../utils/errors/validationError');
 

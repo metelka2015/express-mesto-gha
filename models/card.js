@@ -1,3 +1,4 @@
+// eslint-disable-next-line linebreak-style
 const mongoose = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const validator = require('validator');

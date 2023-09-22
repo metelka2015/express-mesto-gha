@@ -1,13 +1,11 @@
 // eslint-disable-next-line import/order
 const userModel = require('../models/user');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { HTTP_STATUS_OK } = require('http2').constants;
 
 const UnauthorizedError = require('../utils/errors/unauthtorizedError');
 
-// eslint-disable-next-line consistent-return
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
