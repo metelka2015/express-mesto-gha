@@ -18,7 +18,7 @@ const getCards = (req, res, next) => cardModel.find({})
 
 const deleteCardById = (req, res, next) => {
   const { cardId } = req.params;
-  return cardModel.findByIdAndRemove(cardId)
+  return cardModel.findById(cardId)
     .orFail(() => {
       throw new NotFoundError('Card not found');
     })
@@ -26,7 +26,14 @@ const deleteCardById = (req, res, next) => {
       if (`${card.owner}` !== req.user._id) {
         throw new ForbiddenError('Вы не можете удалить чужую карточку');
       }
-      res.status(HTTP_STATUS_OK).send(card);
+      cardModel.findByIdAndRemove(cardId)
+        .orFail(() => {
+          throw new NotFoundError('Card not found');
+        })
+        .then(() => {
+          res.status(HTTP_STATUS_OK).send(card);
+        })
+        .catch(next);
     })
     .catch(next);
 };
