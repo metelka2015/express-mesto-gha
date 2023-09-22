@@ -7,4 +7,4 @@ class ConflictError extends Error {
   }
 }
 
-module.exports = ForbiddenError;
+module.exports = new ConflictError('Данный Email уже зарегистрирован');

@@ -1,8 +1,5 @@
 const conflictError = require('../utils/errors/conflictError');
 const validationError = require('../utils/errors/validationError');
-const notFoundError = require('../utils/errors/notFoundError');
-const unauthorizedError = require('../utils/errors/unauthtorizedError');
-const forbiddenError = require('../utils/errors/forbiddenError');
 
 const handleError = (err, req, res, next) => {
   if (err.name === 'NotFoundError') {
@@ -17,7 +14,20 @@ const handleError = (err, req, res, next) => {
     return;
   }
 
+  if (err.code === 11000) {
+    res.status(conflictError.statusCode).send({ message: conflictError.message });
+    return;
+  }
 
+  if (err.name === 'ForbiddenError') {
+    res.status(err.statusCode).send({ message: err.message });
+    return;
+  }
+
+  if (err.name === 'UnauthorizedError') {
+    res.status(err.statusCode).send({ message: err.message });
+    return;
+  }
 
   // если у ошибки нет статуса, выставляем 500
   const { statusCode = 500, message } = err;
@@ -30,6 +40,7 @@ const handleError = (err, req, res, next) => {
         ? 'На сервере произошла ошибка'
         : message,
     });
+  next();
 };
 
 module.exports = handleError;

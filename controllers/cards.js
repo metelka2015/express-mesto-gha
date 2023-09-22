@@ -3,82 +3,56 @@
 /* eslint-disable import/order */
 const cardModel = require('../models/card');
 const {
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_FORBIDDEN,
 } = require('http2').constants;
+const NotFoundError = require('../utils/errors/notFoundError');
+const ForbiddenError = require('../utils/errors/forbiddenError');
 
-const createCard = (req, res) => cardModel.create({ name: req.body.name, link: req.body.link, owner: req.user._id })
+const createCard = (req, res, next) => cardModel.create({ name: req.body.name, link: req.body.link, owner: req.user._id })
   .then((card) => res.status(HTTP_STATUS_CREATED).send(card))
-  .catch((err) => {
-    if (err.name === 'ValidationError') {
-      return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid Data' });
-    }
-    return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
-  });
+  .catch(next);
 
-const getCards = (req, res) => cardModel.find({})
+const getCards = (req, res, next) => cardModel.find({})
   .then((card) => res.status(HTTP_STATUS_OK).send(card))
-  .catch(() => res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' }));
+  .catch(next);
 
-const deleteCardById = (req, res) => {
+const deleteCardById = (req, res, next) => {
   const { cardId } = req.params;
   return cardModel.findByIdAndRemove(cardId)
-    .orFail(new Error('NotValidId'))
+    .orFail(() => {
+      throw new NotFoundError('Card not found');
+    })
     .then((card) => {
       if (`${card.owner}` !== req.user._id) {
-        return res.status(HTTP_STATUS_FORBIDDEN).send({ message: 'Вы не можете удалить чужую карточку' });
+        throw new ForbiddenError('Вы не можете удалить чужую карточку');
       }
-      res.status(HTTP_STATUS_OK).send(card)})
-    .catch((err) => {
-      if (err.message === 'NotValidId') {
-        return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Card not found' });
-      }
-      if (err.name === 'CastError') {
-        return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid ID' });
-      }
-      return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
-    });
+      res.status(HTTP_STATUS_OK).send(card);
+    })
+    .catch(next);
 };
 
-const likeCard = (req, res) => cardModel.findByIdAndUpdate(
+const likeCard = (req, res, next) => cardModel.findByIdAndUpdate(
   req.params.cardId,
   { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
   { new: true },
 )
-  .orFail(new Error('NotValidId'))
+  .orFail(() => {
+    throw new NotFoundError('Card not found');
+  })
   .then((card) => res.status(HTTP_STATUS_OK).send(card))
-  .catch((err) => {
-    if (err.message === 'NotValidId') {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Card not found' });
-    }
-    if (err.name === 'CastError') {
-      return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid ID' });
-    }
+  .catch(next);
 
-    return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
-  });
-
-const dislikeCard = (req, res) => cardModel.findByIdAndUpdate(
+const dislikeCard = (req, res, next) => cardModel.findByIdAndUpdate(
   req.params.cardId,
   { $pull: { likes: req.user._id } }, // убрать _id из массива
   { new: true },
 )
-  .orFail(new Error('NotValidId'))
+  .orFail(() => {
+    throw new NotFoundError('Card not found');
+  })
   .then((card) => res.status(HTTP_STATUS_OK).send(card))
-  .catch((err) => {
-    if (err.message === 'NotValidId') {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Card not found' });
-    }
-    if (err.name === 'CastError') {
-      return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Invalid ID' });
-    }
-
-    return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Server Error' });
-  });
+  .catch(next);
 
 module.exports = {
   getCards,

@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
       validator: (v) => validator.isEmail(v),
       message: 'Некорректный Email',
     },
-    unique: [true, 'Поле "email" должно быть уникальным'],
+    unique: true,
   },
   password: {
     type: String,
